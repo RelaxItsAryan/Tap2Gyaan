@@ -4,11 +4,11 @@ import { useApp } from '../context/AppContext';
 import {
   Users, Timer, Brain, Briefcase, StickyNote, ListChecks, BookOpen,
   CalendarDays, Clock3, BarChart3, Trophy, Settings, LogOut, Menu, X,
-  Flame, Bot
+  Flame, Bot, Info
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/', icon: Users, label: 'Study Rooms' },
+  { path: '/', icon: Info, label: 'About Us' },
   { path: '/pomodoro', icon: Timer, label: 'Pomodoro' },
   { path: '/ai-chat', icon: Bot, label: 'AI Assistant' },
   { path: '/quizzes', icon: Brain, label: 'Quizzes' },

@@ -3,8 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import LoginPage from './components/LoginPage';
-import JoinClass from './components/JoinClass';
-import ClassRoom from './components/ClassRoom';
+import AboutUs from './components/AboutUs';
 import PomodoroTimer from './components/PomodoroTimer';
 import QuizPage from './components/QuizPage';
 import InterviewPrep from './components/InterviewPrep';
@@ -43,8 +42,7 @@ function App() {
       <main className="lg:ml-[72px] pb-20 lg:pb-0 min-h-screen">
         <div className="py-8 px-4 sm:px-6 lg:px-8">
           <Routes>
-            <Route path="/" element={<JoinClass />} />
-            <Route path="/room/:id" element={<ClassRoom />} />
+            <Route path="/" element={<AboutUs />} />
             <Route path="/pomodoro" element={<PomodoroTimer />} />
             <Route path="/ai-chat" element={<AIChatbot />} />
             <Route path="/quizzes" element={<QuizPage />} />
