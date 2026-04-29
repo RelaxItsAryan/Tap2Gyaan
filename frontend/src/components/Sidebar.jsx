@@ -15,7 +15,7 @@ const navItems = [
   { path: '/interview', icon: Briefcase, label: 'Interview' },
   { path: '/notes', icon: StickyNote, label: 'Notes' },
   { path: '/planner', icon: ListChecks, label: 'Planner' },
-  { path: '/books', icon: BookOpen, label: 'Books' },
+  { path: '/books', icon: BookOpen, label: 'AI book notes' },
   { path: '/calendar', icon: CalendarDays, label: 'Calendar' },
   { path: '/timetable', icon: Clock3, label: 'Timetable' },
   { path: '/reports', icon: BarChart3, label: 'Reports' },
