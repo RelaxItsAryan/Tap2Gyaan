@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Mail, Lock, Shield, Globe } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import logo from '../assets/logo.png';
+
 import { triggerToast } from './Toast';
 import { auth } from '../firebase';
 import {
@@ -109,33 +111,31 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 animate-slide-up">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-brand-accent to-blue-400 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-2xl shadow-brand-accent/20">
-            <LogIn size={40} className="text-white" />
+          <div className="w-24 h-24 bg-gradient-to-br from-brand-accent/20 to-blue-400/20 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl shadow-brand-accent/10 overflow-hidden border border-white/10 p-2">
+            <img src={logo} alt="Tap2Gyaan Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-black text-white mb-2">One Tap Study</h1>
+          <h1 className="text-3xl font-black text-white mb-2">Tap2Gyaan</h1>
           <p className="text-slate-400">Secure AES-256 Encrypted Portal</p>
         </div>
 
         <div className="bg-brand-card/80 backdrop-blur-xl border border-brand-border rounded-3xl p-8 shadow-2xl">
-          
+
           {/* Tabs */}
           {activeTab !== 'otp' && (
             <div className="flex p-1 bg-brand-bg border border-brand-border rounded-xl mb-6">
               <button
                 type="button"
                 onClick={() => setActiveTab('login')}
-                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-                  activeTab === 'login' ? 'bg-brand-card text-white shadow-md' : 'text-slate-500 hover:text-slate-300'
-                }`}
+                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'login' ? 'bg-brand-card text-white shadow-md' : 'text-slate-500 hover:text-slate-300'
+                  }`}
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('signup')}
-                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-                  activeTab === 'signup' ? 'bg-brand-card text-white shadow-md' : 'text-slate-500 hover:text-slate-300'
-                }`}
+                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'signup' ? 'bg-brand-card text-white shadow-md' : 'text-slate-500 hover:text-slate-300'
+                  }`}
               >
                 Sign Up
               </button>
@@ -165,7 +165,7 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1 mb-2 block">Secure Password</label>
                 <div className="relative">
@@ -235,7 +235,7 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1 mb-2 block">Create Password</label>
                 <div className="relative">
