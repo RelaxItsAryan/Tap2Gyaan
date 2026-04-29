@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Sparkles, Loader2, Copy, RefreshCw, History, ChevronRight, Check, XCircle, WandSparkles } from 'lucide-react';
 import { triggerToast } from './Toast';
+import { useApp } from '../context/AppContext';
 
 const STORAGE_KEY = 'ots_ai_book_notes_history';
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
@@ -74,6 +75,7 @@ Rules:
 - If the topic is broad, focus on the most commonly taught version first.`;
 
 export default function BookInsights() {
+  const { trackAction } = useApp();
   const [form, setForm] = useState(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
   const [notesState, setNotesState] = useState(null);
@@ -147,6 +149,7 @@ export default function BookInsights() {
 
       setNotesState(payload);
       setHistory((prev) => [payload, ...prev.filter((item) => item.topic !== topic)]);
+      trackAction('book_finished');
       triggerToast('Notes generated', 'success');
     } catch (error) {
       triggerToast(error.message || 'Could not generate notes', 'error');

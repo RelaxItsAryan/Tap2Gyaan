@@ -11,7 +11,6 @@ import InterviewPrep from './components/InterviewPrep';
 import NotesPage from './components/NotesPage';
 import PlannerPage from './components/PlannerPage';
 import BookInsights from './components/BookInsights';
-import CalendarPage from './components/CalendarPage';
 import TimetablePage from './components/TimetablePage';
 import GamificationPage from './components/GamificationPage';
 import SettingsPage from './components/SettingsPage';
@@ -53,7 +52,6 @@ function App() {
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/planner" element={<PlannerPage />} />
             <Route path="/books" element={<BookInsights />} />
-            <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/timetable" element={<TimetablePage />} />
             <Route path="/gamification" element={<GamificationPage />} />
             <Route path="/settings" element={<SettingsPage />} />

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Trophy, Zap, Star, Award, Flame, BookOpen, Clock, Target, Shield, Crown } from 'lucide-react';
+import { Trophy, Zap, Star, Award, Flame, BookOpen, Clock, Target, Shield, Crown, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-const ALL_ACHIEVEMENTS = [
+export const ALL_ACHIEVEMENTS = [
   { id: 'first_session', icon: Star, label: 'First Session', desc: 'Complete your first study session', xpReward: 50, color: '#3B82F6' },
   { id: 'five_sessions', icon: Zap, label: '5 Sessions', desc: 'Complete 5 study sessions', xpReward: 100, color: '#EAB308' },
   { id: 'one_hour', icon: Clock, label: 'Hour Power', desc: 'Study for 1 hour total', xpReward: 100, color: '#3B82F6' },
@@ -17,7 +17,7 @@ const ALL_ACHIEVEMENTS = [
   { id: 'legend', icon: Crown, label: 'Legend', desc: 'Reach Level 10', xpReward: 500, color: '#3B82F6' },
 ];
 
-const DAILY_CHALLENGES = [
+export const DAILY_CHALLENGES = [
   { id: 'dc1', label: 'Study for 30 minutes', xp: 30 },
   { id: 'dc2', label: 'Complete a quiz', xp: 25 },
   { id: 'dc3', label: 'Create a note', xp: 15 },
@@ -26,7 +26,7 @@ const DAILY_CHALLENGES = [
 ];
 
 export default function GamificationPage() {
-  const { xp, achievements } = useApp();
+  const { xp, achievements, dailyProgress } = useApp();
 
   const level = Math.floor(xp / 500) + 1;
   const xpInLevel = xp % 500;
@@ -86,15 +86,17 @@ export default function GamificationPage() {
         </h3>
         <div className="space-y-3">
           {todayChallenges.map(ch => (
-            <div key={ch.id} className="flex items-center gap-3 p-3 bg-brand-bg border border-brand-border rounded-xl">
-              <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                <Star size={14} className="text-yellow-400" />
+            <div key={ch.id} className={`flex items-center gap-3 p-3 border rounded-xl transition-all ${dailyProgress.claimed?.includes(ch.id) ? 'bg-brand-success/5 border-brand-success/30' : 'bg-brand-bg border-brand-border'}`}>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${dailyProgress.claimed?.includes(ch.id) ? 'bg-brand-success/20' : 'bg-yellow-500/10'}`}>
+                <Star size={14} className={dailyProgress.claimed?.includes(ch.id) ? 'text-brand-success' : 'text-yellow-400'} />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-white">{ch.label}</div>
+                <div className={`text-sm font-medium ${dailyProgress.claimed?.includes(ch.id) ? 'text-brand-success text-opacity-90' : 'text-white'}`}>{ch.label}</div>
                 <div className="text-xs text-brand-accent">+{ch.xp} XP</div>
               </div>
-              <div className="w-5 h-5 rounded-md border-2 border-slate-600" />
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center ${dailyProgress.claimed?.includes(ch.id) ? 'border-brand-success bg-brand-success' : 'border-slate-600'}`}>
+                {dailyProgress.claimed?.includes(ch.id) && <Check size={12} className="text-black" />}
+              </div>
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StickyNote, Plus, Search, Trash2, Edit3, X, Save, Clock } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 const STORAGE_KEY = 'otsNotes';
 
@@ -17,6 +18,7 @@ const saveNotes = (notes) => {
 const COLORS = ['#3B82F6', '#22C55E', '#60A5FA', '#A855F7', '#EC4899', '#EAB308'];
 
 export default function NotesPage() {
+  const { trackAction } = useApp();
   const [notes, setNotes] = useState(loadNotes);
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState(null); // null or note id
@@ -40,6 +42,7 @@ export default function NotesPage() {
       updatedAt: Date.now()
     };
     setNotes(prev => [note, ...prev]);
+    trackAction('note_created');
     resetForm();
   };
 

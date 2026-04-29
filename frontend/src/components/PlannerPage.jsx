@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, Sparkles, Loader2, WandSparkles, Copy, RefreshCw, Clock3, ArrowRight, CheckCircle2, ListTodo } from 'lucide-react';
 import { triggerToast } from './Toast';
 import { useTimer } from '../context/TimerContext';
+import { useApp } from '../context/AppContext';
 
 const STORAGE_KEY = 'ots_ai_study_plans';
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
@@ -210,6 +211,7 @@ const getDateLabel = (dateString) => {
 };
 
 export default function PlannerPage() {
+  const { trackAction } = useApp();
   const { syncStudyBlock } = useTimer();
   const navigate = useNavigate();
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -312,6 +314,7 @@ export default function PlannerPage() {
 
       setPlan(nextPlan);
       setPlans((prev) => [nextPlan, ...prev.filter((item) => item.examDate !== examDate)]);
+      trackAction('plan_generated');
 
       const firstBlock = nextPlan.days?.[0]?.blocks?.[0];
       if (firstBlock) {

@@ -16,7 +16,7 @@ const formatTime = (s) => {
 };
 
 export default function PomodoroTimer() {
-  const { addXP } = useApp();
+  const { addXP, trackAction } = useApp();
   const { syncedBlock, syncStudyBlock } = useTimer();
   const [preset, setPreset] = useState('classic');
   const [mode, setMode] = useState('work'); // work | break | longBreak
@@ -94,6 +94,7 @@ export default function PomodoroTimer() {
               const newSessions = sessions + 1;
               setSessions(newSessions);
               addXP(25);
+              trackAction('pomodoro_session', 25);
               // Every 4 sessions → long break
               if (newSessions % 4 === 0) {
                 setMode('longBreak');

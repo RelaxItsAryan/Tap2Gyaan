@@ -16,7 +16,6 @@ const navItems = [
   { path: '/notes', icon: StickyNote, label: 'Notes' },
   { path: '/planner', icon: ListChecks, label: 'AI Study Plan' },
   { path: '/books', icon: BookOpen, label: 'AI book notes' },
-  { path: '/calendar', icon: CalendarDays, label: 'Calendar' },
   { path: '/timetable', icon: Clock3, label: 'Timetable' },
   { path: '/gamification', icon: Trophy, label: 'Gamification' },
   { path: '/settings', icon: Settings, label: 'Settings' },

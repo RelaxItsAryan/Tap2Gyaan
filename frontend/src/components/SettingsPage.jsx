@@ -139,7 +139,7 @@ export default function SettingsPage() {
             <AlertTriangle size={16} className="text-red-400" />
             <h3 className="text-sm font-bold text-red-400">Danger Zone</h3>
           </div>
-          <p className="text-sm text-slate-400 mb-4">This will permanently delete all your local data including notes, tasks, books, calendar events, and settings.</p>
+          <p className="text-sm text-slate-400 mb-4">This will permanently delete all your local data including notes, tasks, books, timetable, and settings.</p>
 
           {showResetConfirm ? (
             <div className="flex gap-3 animate-fade-in">

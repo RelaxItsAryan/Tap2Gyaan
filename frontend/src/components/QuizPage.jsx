@@ -36,7 +36,7 @@ const QUESTION_BANK = {
 const TOPICS = Object.keys(QUESTION_BANK);
 
 export default function QuizPage() {
-  const { addXP } = useApp();
+  const { addXP, trackAction } = useApp();
   const [topic, setTopic] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -90,6 +90,8 @@ export default function QuizPage() {
     if (currentQ + 1 >= questions.length) {
       setFinished(true);
       addXP(score * 20);
+      const pct = Math.round((score / questions.length) * 100);
+      trackAction('quiz_completed', pct);
     } else {
       setCurrentQ(prev => prev + 1);
       setSelected(null);

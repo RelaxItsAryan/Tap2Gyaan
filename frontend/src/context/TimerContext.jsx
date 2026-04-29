@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { doc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useApp } from './AppContext';
 
 const TimerContext = createContext();
 
@@ -15,6 +16,7 @@ export const TimerProvider = ({ children }) => {
   const [syncedBlock, setSyncedBlock] = useState(null);
 
   const timerRef = useRef(null);
+  const { trackAction } = useApp();
 
   const syncStudyBlock = (block) => {
     setSyncedBlock(block);
@@ -112,6 +114,7 @@ export const TimerProvider = ({ children }) => {
       console.error("Error stopping study session:", e);
     }
 
+    trackAction('study_session', durationSeconds);
     resetLocalTimer();
     return durationSeconds;
   };
