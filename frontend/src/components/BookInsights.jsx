@@ -1,154 +1,424 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Plus, X, Trash2, Edit3, BookMarked } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BookOpen, Sparkles, Loader2, Copy, RefreshCw, History, ChevronRight, Check, XCircle, WandSparkles } from 'lucide-react';
+import { triggerToast } from './Toast';
 
-const STORAGE_KEY = 'otsBooks';
-const loadBooks = () => { try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; } catch { return []; } };
+const STORAGE_KEY = 'ots_ai_book_notes_history';
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+const LEVELS = [
+  { label: 'School', value: 'school' },
+  { label: 'College', value: 'college' },
+  { label: 'Exam Prep', value: 'exam-prep' },
+  { label: 'Quick Revision', value: 'quick-revision' },
+];
+
+const LENGTHS = [
+  { label: 'Short', value: 'short' },
+  { label: 'Balanced', value: 'balanced' },
+  { label: 'Detailed', value: 'detailed' },
+];
+
+const DEFAULT_FORM = {
+  topic: '',
+  level: 'college',
+  length: 'balanced',
+};
+
+const loadHistory = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const stripCodeFences = (text) => text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+const parseAiPayload = (content) => {
+  const cleaned = stripCodeFences(content);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    return {
+      title: 'AI Study Notes',
+      suggestedBooks: [],
+      notes: cleaned,
+      quickRevision: [],
+      practiceQuestions: [],
+    };
+  }
+};
+
+const notePrompt = (topic, level, length) => `Return ONLY valid JSON with this exact structure:
+{
+  "title": string,
+  "suggestedBooks": [string, string, string],
+  "notes": string,
+  "quickRevision": [string, string, string, string, string],
+  "practiceQuestions": [string, string, string]
+}
+
+Topic: ${topic}
+Student level: ${level}
+Depth: ${length}
+
+Rules:
+- Infer the most relevant textbooks/reference books for the topic.
+- The user does not know book names, so choose them automatically.
+- Generate student-friendly notes from those books.
+- Keep the notes accurate, concise, and structured.
+- notes must be a single markdown-style string with headings like Summary, Core Concepts, Important Terms, and Examples.
+- quickRevision should be bite-sized revision bullets.
+- practiceQuestions should be questions only, no answers.
+- If the topic is broad, focus on the most commonly taught version first.`;
 
 export default function BookInsights() {
-  const [books, setBooks] = useState(loadBooks);
-  const [showAdd, setShowAdd] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [totalPages, setTotalPages] = useState('');
-  const [pagesRead, setPagesRead] = useState('');
-  const [insights, setInsights] = useState('');
-  const [selected, setSelected] = useState(null);
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const [loading, setLoading] = useState(false);
+  const [notesState, setNotesState] = useState(null);
+  const [history, setHistory] = useState(loadHistory);
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(books)); }, [books]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 20)));
+  }, [history]);
 
-  const resetForm = () => { setTitle(''); setAuthor(''); setTotalPages(''); setPagesRead(''); setInsights(''); setEditId(null); setShowAdd(false); };
+  const recentTopics = useMemo(() => history.slice(0, 6), [history]);
 
-  const addBook = (e) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    if (editId) {
-      setBooks(prev => prev.map(b => b.id === editId ? { ...b, title, author, totalPages: +totalPages, pagesRead: +pagesRead, insights, updatedAt: Date.now() } : b));
-    } else {
-      setBooks(prev => [...prev, { id: Date.now().toString(), title, author, totalPages: +totalPages || 100, pagesRead: +pagesRead || 0, insights, createdAt: Date.now(), updatedAt: Date.now() }]);
+  const updateForm = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const generateNotes = async (topicOverride = null) => {
+    const topic = (topicOverride ?? form.topic).trim();
+    if (!topic) {
+      triggerToast('Please enter a topic', 'error');
+      return;
     }
-    resetForm();
+    if (!GROQ_API_KEY) {
+      triggerToast('Missing VITE_GROQ_API_KEY in .env', 'error');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          temperature: 0.35,
+          max_tokens: 1600,
+          messages: [
+            {
+              role: 'system',
+              content: 'You generate educational notes from books as structured JSON only. Do not add markdown fences or explanations outside JSON.'
+            },
+            {
+              role: 'user',
+              content: notePrompt(topic, form.level, form.length)
+            }
+          ]
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error?.message || data.message || 'Failed to generate notes');
+      }
+
+      const content = data?.choices?.[0]?.message?.content?.trim();
+      if (!content) {
+        throw new Error('AI returned an empty response');
+      }
+
+      const parsed = parseAiPayload(content);
+      const payload = {
+        id: Date.now().toString(),
+        topic,
+        level: form.level,
+        length: form.length,
+        ...parsed,
+        createdAt: Date.now(),
+      };
+
+      setNotesState(payload);
+      setHistory((prev) => [payload, ...prev.filter((item) => item.topic !== topic)]);
+      triggerToast('Notes generated', 'success');
+    } catch (error) {
+      triggerToast(error.message || 'Could not generate notes', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const startEdit = (book) => {
-    setEditId(book.id);
-    setTitle(book.title);
-    setAuthor(book.author);
-    setTotalPages(book.totalPages.toString());
-    setPagesRead(book.pagesRead.toString());
-    setInsights(book.insights || '');
-    setShowAdd(true);
+  const copyNotes = async () => {
+    if (!notesState) return;
+    const text = [
+      `Topic: ${notesState.topic}`,
+      `Suggested Books: ${notesState.suggestedBooks?.join(', ') || 'AI picked common textbooks'}`,
+      '',
+      notesState.notes || '',
+      '',
+      'Quick Revision:',
+      ...(notesState.quickRevision || []).map((item) => `- ${item}`),
+      '',
+      'Practice Questions:',
+      ...(notesState.practiceQuestions || []).map((item) => `- ${item}`),
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      triggerToast('Notes copied to clipboard', 'success');
+    } catch {
+      triggerToast('Clipboard permission denied', 'error');
+    }
   };
 
-  const deleteBook = (id) => { setBooks(prev => prev.filter(b => b.id !== id)); if (selected === id) setSelected(null); };
+  const removeHistoryItem = (id) => {
+    setHistory((prev) => prev.filter((item) => item.id !== id));
+    if (notesState?.id === id) setNotesState(null);
+  };
 
-  const totalRead = books.reduce((a, b) => a + b.pagesRead, 0);
-  const totalBookPages = books.reduce((a, b) => a + b.totalPages, 0);
-  const completedBooks = books.filter(b => b.pagesRead >= b.totalPages).length;
+  const loadHistoryItem = (item) => {
+    setForm((prev) => ({ ...prev, topic: item.topic, level: item.level, length: item.length }));
+    setNotesState(item);
+    triggerToast(`Loaded notes for ${item.topic}`, 'info');
+  };
 
   return (
-    <div className="page-enter max-w-4xl mx-auto px-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-black text-white mb-1">Book Insights</h1>
-          <p className="text-slate-400 text-sm">{books.length} books • {totalRead} pages read</p>
-        </div>
-        <button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-brand-accent hover:bg-brand-accent-hover text-white px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg shadow-brand-accent/20">
-          <Plus size={18} /> Add Book
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <div className="bg-brand-card border border-brand-border rounded-xl p-4 text-center">
-          <div className="text-2xl font-black text-white">{books.length}</div>
-          <div className="text-xs text-slate-400 mt-1">Books</div>
-        </div>
-        <div className="bg-brand-card border border-brand-border rounded-xl p-4 text-center">
-          <div className="text-2xl font-black text-brand-accent">{totalRead}</div>
-          <div className="text-xs text-slate-400 mt-1">Pages Read</div>
-        </div>
-        <div className="bg-brand-card border border-brand-border rounded-xl p-4 text-center">
-          <div className="text-2xl font-black text-brand-success">{completedBooks}</div>
-          <div className="text-xs text-slate-400 mt-1">Completed</div>
-        </div>
-      </div>
-
-      {/* Add modal */}
-      {showAdd && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-brand-card border border-brand-border rounded-2xl w-full max-w-md shadow-2xl animate-fade-in-scale">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-brand-border">
-              <h2 className="text-lg font-bold text-white">{editId ? 'Edit Book' : 'Add Book'}</h2>
-              <button onClick={resetForm} className="text-slate-400 hover:text-white"><X size={20} /></button>
+    <div className="page-enter max-w-6xl mx-auto px-4">
+      <div className="relative overflow-hidden rounded-[2rem] border border-brand-border bg-brand-card/90 backdrop-blur-sm mb-6">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.18),transparent_36%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.12),transparent_32%)]" />
+        <div className="relative p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs mb-4">
+                <WandSparkles size={14} className="text-brand-accent" /> AI-powered study notes
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-3">
+                AI Book Notes
+              </h1>
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
+                You do not need to know the book name. Enter the topic, pick the study level, and Tap2Gyaan will infer the most relevant textbooks, then generate clean revision notes for you.
+              </p>
             </div>
-            <form onSubmit={addBook} className="p-6 space-y-4">
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Book title" className="w-full bg-brand-bg border border-brand-border px-4 py-3 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition-all" autoFocus />
-              <input type="text" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Author" className="w-full bg-brand-bg border border-brand-border px-4 py-3 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition-all" />
-              <div className="grid grid-cols-2 gap-3">
-                <input type="number" value={totalPages} onChange={e => setTotalPages(e.target.value)} placeholder="Total pages" className="w-full bg-brand-bg border border-brand-border px-4 py-3 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition-all" />
-                <input type="number" value={pagesRead} onChange={e => setPagesRead(e.target.value)} placeholder="Pages read" className="w-full bg-brand-bg border border-brand-border px-4 py-3 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition-all" />
+            <div className="grid grid-cols-3 gap-3 w-full lg:w-auto">
+              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-center min-w-[92px]">
+                <div className="text-white font-black text-xl">{history.length}</div>
+                <div className="text-xs text-slate-400 mt-1">Saved</div>
               </div>
-              <textarea value={insights} onChange={e => setInsights(e.target.value)} placeholder="Key insights / highlights..." rows={3} className="w-full bg-brand-bg border border-brand-border px-4 py-3 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition-all resize-none" />
-              <button type="submit" disabled={!title.trim()} className="w-full bg-brand-accent hover:bg-brand-accent-hover text-white py-3 rounded-xl font-bold transition-all disabled:opacity-40">
-                {editId ? 'Update Book' : 'Add Book'}
-              </button>
-            </form>
+              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-center min-w-[92px]">
+                <div className="text-brand-accent font-black text-xl">{LEVELS.find((l) => l.value === form.level)?.label}</div>
+                <div className="text-xs text-slate-400 mt-1">Level</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-center min-w-[92px]">
+                <div className="text-brand-success font-black text-xl">{LENGTHS.find((l) => l.value === form.length)?.label}</div>
+                <div className="text-xs text-slate-400 mt-1">Depth</div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Books grid */}
-      {books.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-16 h-16 bg-brand-card rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-border">
-            <BookOpen size={28} className="text-slate-500" />
+          <div className="mt-8 grid gap-3 lg:grid-cols-[1.3fr,0.7fr,0.7fr,auto]">
+            <input
+              type="text"
+              value={form.topic}
+              onChange={(e) => updateForm('topic', e.target.value)}
+              placeholder="Enter topic: Cell cycle, Trigonometry, OS, Photosynthesis..."
+              className="w-full bg-brand-bg border border-brand-border px-4 py-3.5 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-brand-accent transition-all"
+            />
+
+            <select
+              value={form.level}
+              onChange={(e) => updateForm('level', e.target.value)}
+              className="w-full bg-brand-bg border border-brand-border px-4 py-3.5 rounded-2xl text-white focus:outline-none focus:border-brand-accent transition-all"
+            >
+              {LEVELS.map((level) => (
+                <option key={level.value} value={level.value}>{level.label}</option>
+              ))}
+            </select>
+
+            <select
+              value={form.length}
+              onChange={(e) => updateForm('length', e.target.value)}
+              className="w-full bg-brand-bg border border-brand-border px-4 py-3.5 rounded-2xl text-white focus:outline-none focus:border-brand-accent transition-all"
+            >
+              {LENGTHS.map((len) => (
+                <option key={len.value} value={len.value}>{len.label}</option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => generateNotes()}
+              disabled={loading || !form.topic.trim()}
+              className="bg-brand-accent hover:bg-brand-accent-hover text-white px-5 py-3.5 rounded-2xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-brand-accent/20"
+            >
+              {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {loading ? 'Generating' : 'Generate'}
+            </button>
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">No books yet</h3>
-          <p className="text-slate-400 text-sm">Track your reading progress</p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {books.map(book => {
-            const pct = Math.min(100, Math.round((book.pagesRead / book.totalPages) * 100));
-            const isDone = pct >= 100;
-            return (
-              <div key={book.id} className="bg-brand-card border border-brand-border rounded-2xl p-5 hover:border-slate-600 transition-all group">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDone ? 'bg-green-500/15' : 'bg-brand-accent/15'}`}>
-                      <BookMarked size={20} className={isDone ? 'text-green-400' : 'text-brand-accent'} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white line-clamp-1">{book.title}</h3>
-                      {book.author && <p className="text-xs text-slate-400">{book.author}</p>}
-                    </div>
+      </div>
+
+      <div className="grid lg:grid-cols-[1.35fr,0.65fr] gap-6 items-start">
+        <div className="space-y-6">
+          {notesState ? (
+            <div className="bg-brand-card border border-brand-border rounded-3xl overflow-hidden">
+              <div className="p-6 sm:p-7 border-b border-brand-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-brand-accent text-xs uppercase tracking-[0.2em] mb-2">
+                    <BookOpen size={14} /> AI study pack
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => startEdit(book)} className="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white"><Edit3 size={14} /></button>
-                    <button onClick={() => deleteBook(book.id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400"><Trash2 size={14} /></button>
+                  <h2 className="text-2xl font-black text-white">{notesState.title || notesState.topic}</h2>
+                  <p className="text-sm text-slate-400 mt-1">Topic: {notesState.topic} • {LEVELS.find((l) => l.value === notesState.level)?.label} • {LENGTHS.find((l) => l.value === notesState.length)?.label}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={copyNotes}
+                    className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2"
+                  >
+                    <Copy size={14} /> Copy
+                  </button>
+                  <button
+                    onClick={() => generateNotes(notesState.topic)}
+                    className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2"
+                  >
+                    <RefreshCw size={14} /> Regenerate
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 sm:p-7 space-y-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 mb-3">Suggested Books</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(notesState.suggestedBooks?.length ? notesState.suggestedBooks : ['AI selected the most relevant textbooks automatically']).map((book) => (
+                      <span key={book} className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-brand-bg border border-brand-border text-sm text-slate-200">
+                        <BookOpen size={14} className="text-brand-accent" /> {book}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
-                {/* Progress */}
-                <div className="mb-3">
-                  <div className="flex justify-between text-xs text-slate-400 mb-1.5">
-                    <span>{book.pagesRead} / {book.totalPages} pages</span>
-                    <span className={isDone ? 'text-green-400 font-bold' : 'text-brand-accent font-medium'}>{pct}%</span>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-brand-border bg-brand-bg p-5">
+                    <div className="flex items-center gap-2 mb-3 text-white font-semibold">
+                      <Sparkles size={16} className="text-brand-accent" /> Notes
+                    </div>
+                    <div className="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap">{notesState.notes}</div>
                   </div>
-                  <div className="h-2 bg-brand-bg rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${isDone ? 'bg-green-500' : 'bg-brand-accent'}`} style={{ width: `${pct}%` }} />
+
+                  <div className="space-y-4">
+                    <div className="rounded-2xl border border-brand-border bg-brand-bg p-5">
+                      <div className="flex items-center gap-2 mb-3 text-white font-semibold">
+                        <Check size={16} className="text-brand-success" /> Quick Revision
+                      </div>
+                      <ul className="space-y-2">
+                        {(notesState.quickRevision || []).map((item, index) => (
+                          <li key={`${item}-${index}`} className="flex gap-2 text-sm text-slate-300">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-brand-accent shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="rounded-2xl border border-brand-border bg-brand-bg p-5">
+                      <div className="flex items-center gap-2 mb-3 text-white font-semibold">
+                        <ChevronRight size={16} className="text-brand-accent" /> Practice Questions
+                      </div>
+                      <ul className="space-y-2">
+                        {(notesState.practiceQuestions || []).map((item, index) => (
+                          <li key={`${item}-${index}`} className="flex gap-2 text-sm text-slate-300">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-brand-success shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-
-                {book.insights && (
-                  <p className="text-xs text-slate-400 line-clamp-2 italic">"{book.insights}"</p>
-                )}
               </div>
-            );
-          })}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-brand-border bg-brand-card p-10 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-brand-border flex items-center justify-center">
+                <BookOpen size={28} className="text-slate-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">No notes generated yet</h3>
+              <p className="text-sm text-slate-400 max-w-lg mx-auto">
+                Enter a topic and let AI infer the right books, then generate structured study notes for you.
+              </p>
+            </div>
+          )}
         </div>
-      )}
+
+        <aside className="space-y-6">
+          <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
+            <div className="flex items-center gap-2 mb-4 text-white font-bold">
+              <History size={16} className="text-brand-accent" /> Recent Topics
+            </div>
+            {recentTopics.length === 0 ? (
+              <p className="text-sm text-slate-400">Your generated notes will appear here.</p>
+            ) : (
+              <div className="space-y-2">
+                {recentTopics.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => loadHistoryItem(item)}
+                    className="w-full text-left rounded-2xl border border-brand-border bg-brand-bg/70 hover:border-slate-500 transition-all p-4 group"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-white font-semibold line-clamp-1">{item.topic}</div>
+                        <div className="text-xs text-slate-400 mt-1">{LEVELS.find((l) => l.value === item.level)?.label} • {LENGTHS.find((l) => l.value === item.length)?.label}</div>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-500 group-hover:text-white">
+                        <span className="text-xs">Open</span>
+                        <ChevronRight size={14} />
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-3xl border border-brand-border bg-brand-card p-5">
+            <div className="flex items-center gap-2 mb-4 text-white font-bold">
+              <XCircle size={16} className="text-brand-success" /> History Manager
+            </div>
+            {history.length === 0 ? (
+              <p className="text-sm text-slate-400">Nothing saved yet.</p>
+            ) : (
+              <div className="space-y-3 max-h-[340px] overflow-auto pr-1 custom-scrollbar">
+                {history.map((item) => (
+                  <div key={item.id} className="rounded-2xl border border-brand-border bg-brand-bg p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-white font-medium line-clamp-1">{item.topic}</div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          {new Date(item.createdAt).toLocaleDateString()} • {LEVELS.find((l) => l.value === item.level)?.label}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeHistoryItem(item.id)}
+                        className="text-slate-500 hover:text-red-400 transition-colors"
+                        aria-label={`Remove ${item.topic}`}
+                      >
+                        <XCircle size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
