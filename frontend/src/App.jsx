@@ -15,7 +15,7 @@ import GamificationPage from './components/GamificationPage';
 import SettingsPage from './components/SettingsPage';
 import AIChatbot from './components/AIChatbot';
 import Toast from './components/Toast';
-import bgImage from './assets/Bg.png';
+import bgImage from './assets/Bg_new.png';
 
 function App() {
   const { user } = useApp();
@@ -33,14 +33,18 @@ function App() {
 
   return (
     <div
-      className="min-h-screen bg-brand-bg bg-cover bg-center bg-fixed"
+      className="min-h-screen bg-brand-bg bg-cover bg-center bg-fixed font-outfit selection:bg-brand-accent/30"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
       <Sidebar />
 
       {/* Main content area — pushed right on desktop for sidebar */}
-      <main className="lg:ml-[72px] pb-20 lg:pb-0 min-h-screen">
-        <div className="py-8 px-4 sm:px-6 lg:px-8">
+      <main className="lg:pl-[90px] lg:pr-6 pb-20 lg:pb-6 min-h-screen pt-4 lg:pt-6">
+        <div className="w-full max-w-7xl mx-auto glass-panel rounded-3xl min-h-[calc(100vh-3rem)] p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+          {/* Subtle glowing orbs behind content */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-accent/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-secondary/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+
           <Routes>
             <Route path="/" element={<AboutUs />} />
             <Route path="/pomodoro" element={<PomodoroTimer />} />

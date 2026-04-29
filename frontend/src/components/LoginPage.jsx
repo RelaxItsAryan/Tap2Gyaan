@@ -106,19 +106,21 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute top-[20%] left-[20%] w-96 h-96 bg-brand-accent/20 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[20%] right-[20%] w-96 h-96 bg-blue-400/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-brand-accent/20 rounded-full blur-[120px] pointer-events-none animate-float" />
+      <div className="absolute bottom-[10%] right-[10%] w-[500px] h-[500px] bg-brand-secondary/20 rounded-full blur-[120px] pointer-events-none animate-float" style={{ animationDelay: '2s' }} />
 
       <div className="w-full max-w-md relative z-10 animate-slide-up">
         <div className="text-center mb-8">
           <div className="w-24 h-24 mx-auto flex items-center justify-center mb-6 overflow-hidden">
             <img src={logo} alt="Tap2Gyaan Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-black text-white mb-2">Tap2Gyaan</h1>
-          <p className="text-slate-400">Secure AES-256 Encrypted Portal</p>
+          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-secondary mb-2 drop-shadow-lg">Tap2Gyaan 🚀</h1>
+          <p className="text-slate-300 font-medium tracking-wide">Your Ultimate AI Study Portal 🧠</p>
         </div>
 
-        <div className="bg-brand-card/80 backdrop-blur-xl border border-brand-border rounded-3xl p-8 shadow-2xl">
+        <div className="glass-panel rounded-3xl p-8 relative overflow-hidden group">
+          {/* Subtle inner glow */}
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-brand-accent/30 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
           {/* Tabs */}
           {activeTab !== 'otp' && (
@@ -186,9 +188,9 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-brand-accent hover:bg-brand-accent-hover text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-accent/20 flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-brand-accent to-blue-500 hover:from-blue-500 hover:to-brand-secondary text-white py-3.5 rounded-xl font-bold transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:shadow-[0_0_30px_rgba(0,240,255,0.6)] hover:scale-[1.02] flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
               >
-                {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Secure Login'}
+                {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Secure Login 🔐'}
               </button>
 
               <button
@@ -256,9 +258,9 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-brand-accent hover:bg-brand-accent-hover text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-brand-accent/20 flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-brand-secondary to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white py-3.5 rounded-xl font-bold transition-all duration-300 shadow-[0_0_20px_rgba(255,0,122,0.3)] hover:shadow-[0_0_30px_rgba(255,0,122,0.6)] hover:scale-[1.02] flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
               >
-                {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Create Account'}
+                {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Create Account ✨'}
               </button>
             </form>
           )}

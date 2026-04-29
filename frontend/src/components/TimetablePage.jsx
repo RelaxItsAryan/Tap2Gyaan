@@ -118,7 +118,7 @@ export default function TimetablePage() {
 
       {/* Add slot modal */}
       {showAdd && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
           <div className="bg-brand-card border border-brand-border rounded-2xl w-full max-w-md shadow-2xl animate-fade-in-scale">
             <div className="flex items-center justify-between px-6 py-4 border-b border-brand-border">
               <h2 className="text-lg font-bold text-white">Add Time Slot</h2>

@@ -5,69 +5,81 @@ import {
 } from 'lucide-react';
 
 const features = [
-  { icon: Timer, title: 'Pomodoro', desc: 'Customizable focus timers with gamified rewards.' },
-  { icon: Bot, title: 'AI Assistant', desc: 'Your personal AI tutor ready to answer questions.' },
-  { icon: Brain, title: 'Quizzes', desc: 'Generate and take quizzes to test your knowledge.' },
-  { icon: Briefcase, title: 'Interview Prep', desc: 'AI-driven mock interviews to boost confidence.' },
-  { icon: StickyNote, title: 'Notes', desc: 'Organize your thoughts and study materials.' },
-  { icon: ListChecks, title: 'AI Study Plan', desc: 'Personalized learning paths tailored to you.' },
-  { icon: BookOpen, title: 'AI Book Notes', desc: 'Quick summaries and insights from books.' },
-  { icon: Clock3, title: 'Timetable', desc: 'Schedule your classes and study sessions.' },
-  { icon: Trophy, title: 'Gamification', desc: 'Earn XP, level up, and stay motivated.' },
+  { icon: Timer, title: 'Pomodoro', desc: 'Customizable focus timers with gamified rewards.', emoji: '🍅' },
+  { icon: Bot, title: 'AI Assistant', desc: 'Your personal AI tutor ready to answer questions.', emoji: '🤖' },
+  { icon: Brain, title: 'Quizzes', desc: 'Generate and take quizzes to test your knowledge.', emoji: '🧠' },
+  { icon: Briefcase, title: 'Interview Prep', desc: 'AI-driven mock interviews to boost confidence.', emoji: '💼' },
+  { icon: StickyNote, title: 'Notes', desc: 'Organize your thoughts and study materials.', emoji: '📝' },
+  { icon: ListChecks, title: 'AI Study Plan', desc: 'Personalized learning paths tailored to you.', emoji: '📅' },
+  { icon: BookOpen, title: 'AI Book Notes', desc: 'Quick summaries and insights from books.', emoji: '📚' },
+  { icon: Clock3, title: 'Timetable', desc: 'Schedule your classes and study sessions.', emoji: '⏰' },
+  { icon: Trophy, title: 'Gamification', desc: 'Earn XP, level up, and stay motivated.', emoji: '🏆' },
 ];
 
 export default function AboutUs() {
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-10">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-          About <span className="text-brand-accent">Tap2Gyaan</span>
+    <div className="max-w-7xl mx-auto space-y-12 animate-fade-in pb-10">
+      {/* Hero Header */}
+      <div className="text-center space-y-6 pt-10">
+        <div className="inline-block px-4 py-1.5 rounded-full glass-button text-brand-accent font-bold text-sm mb-4 animate-float cursor-default">
+          🚀 Next-Gen AI Learning Platform
+        </div>
+        <h1 className="text-6xl md:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
+          Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-secondary">Tap2Gyaan</span>
         </h1>
-        <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-          We built Tap2Gyaan to revolutionize the way you learn. Combining powerful AI tools with gamified motivation, we've created the ultimate all-in-one study platform.
+        <p className="text-slate-300 max-w-3xl mx-auto text-xl leading-relaxed">
+          We built Tap2Gyaan to revolutionize the way you learn. Combining powerful <span className="text-brand-accent font-bold">AI tools</span> with <span className="text-brand-secondary font-bold">gamified motivation</span>, we've created the ultimate all-in-one study platform. 🌟
         </p>
       </div>
 
-      {/* Mission / Vision */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-        <div className="bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all">
-          <div className="w-12 h-12 rounded-xl bg-brand-accent/20 flex items-center justify-center text-brand-accent mb-4">
-            <Zap size={24} />
+      {/* Mission / Vision Glass Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 px-4">
+        {/* Mission */}
+        <div className="glass-panel rounded-[2rem] p-8 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-all duration-300 group cursor-default relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/10 rounded-full blur-3xl group-hover:bg-brand-accent/20 transition-all duration-500" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-accent to-blue-500 flex items-center justify-center text-white mb-6 shadow-lg transform group-hover:rotate-6 transition-all duration-300">
+            <Zap size={32} />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Our Mission</h3>
-          <p className="text-slate-400">To empower students with cutting-edge tools that make learning faster, more engaging, and highly effective.</p>
+          <h3 className="text-2xl font-black text-white mb-3">Our Mission 🎯</h3>
+          <p className="text-slate-400 font-medium leading-relaxed text-lg">To empower students with cutting-edge tools that make learning faster, more engaging, and highly effective.</p>
         </div>
-        <div className="bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 mb-4">
-            <Star size={24} />
+        {/* Vision */}
+        <div className="glass-panel rounded-[2rem] p-8 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(255,0,122,0.2)] transition-all duration-300 group cursor-default relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-secondary/10 rounded-full blur-3xl group-hover:bg-brand-secondary/20 transition-all duration-500" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-secondary to-pink-500 flex items-center justify-center text-white mb-6 shadow-lg transform group-hover:-rotate-6 transition-all duration-300">
+            <Star size={32} />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Our Vision</h3>
-          <p className="text-slate-400">A world where education is personalized, accessible, and fun for everyone, driven by AI.</p>
+          <h3 className="text-2xl font-black text-white mb-3">Our Vision 🌌</h3>
+          <p className="text-slate-400 font-medium leading-relaxed text-lg">A world where education is personalized, accessible, and fun for everyone, driven by Artificial Intelligence.</p>
         </div>
-        <div className="bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 mb-4">
-            <Shield size={24} />
+        {/* Values */}
+        <div className="glass-panel rounded-[2rem] p-8 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(0,255,157,0.2)] transition-all duration-300 group cursor-default relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-success/10 rounded-full blur-3xl group-hover:bg-brand-success/20 transition-all duration-500" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-success to-emerald-500 flex items-center justify-center text-white mb-6 shadow-lg transform group-hover:rotate-12 transition-all duration-300">
+            <Shield size={32} />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Our Values</h3>
-          <p className="text-slate-400">Innovation, accessibility, user-centric design, and continuous improvement in the learning space.</p>
+          <h3 className="text-2xl font-black text-white mb-3">Our Values 💎</h3>
+          <p className="text-slate-400 font-medium leading-relaxed text-lg">Innovation, accessibility, user-centric design, and continuous improvement in the digital learning space.</p>
         </div>
       </div>
 
       {/* Features Showcase */}
-      <div className="mt-16">
-        <h2 className="text-3xl font-black text-white mb-8 text-center">What We Created</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mt-24 pt-10 border-t border-white/10">
+        <h2 className="text-4xl md:text-5xl font-black text-white mb-12 text-center drop-shadow-lg">Discover the Toolkit 🛠️</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
           {features.map((feature, idx) => {
             const Icon = feature.icon;
             return (
-              <div key={idx} className="bg-brand-card/50 border border-brand-border p-5 rounded-2xl flex gap-4 items-start hover:bg-brand-card transition-all">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                  <Icon size={20} className="text-brand-accent" />
+              <div key={idx} className="glass-panel p-6 rounded-3xl flex gap-5 items-start hover:bg-white/10 transition-all duration-300 group cursor-pointer hover:scale-[1.02]">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center shrink-0 border border-white/10 group-hover:border-brand-accent/50 shadow-inner relative">
+                  <div className="absolute inset-0 bg-brand-accent/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Icon size={26} className="text-brand-accent relative z-10" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold mb-1">{feature.title}</h4>
-                  <p className="text-sm text-slate-400">{feature.desc}</p>
+                  <h4 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                    {feature.title} <span className="text-2xl">{feature.emoji}</span>
+                  </h4>
+                  <p className="text-base text-slate-400 font-medium">{feature.desc}</p>
                 </div>
               </div>
             );
@@ -76,9 +88,18 @@ export default function AboutUs() {
       </div>
       
       {/* Footer / CTA */}
-      <div className="mt-16 bg-gradient-to-r from-brand-accent/20 to-blue-500/20 border border-brand-accent/30 rounded-3xl p-8 text-center">
-        <h3 className="text-2xl font-bold text-white mb-3">Ready to level up your studies?</h3>
-        <p className="text-slate-300 mb-6">Explore the tools in the sidebar and start your journey with Tap2Gyaan.</p>
+      <div className="mt-24 relative overflow-hidden rounded-[3rem] p-12 text-center group cursor-pointer hover:scale-[1.01] transition-all duration-500 mx-4 lg:mx-0 border border-white/10">
+        {/* Dynamic gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-accent/20 via-brand-secondary/20 to-blue-600/20 blur-2xl group-hover:blur-3xl transition-all duration-700" />
+        <div className="absolute inset-0 bg-brand-card/60 backdrop-blur-3xl" />
+        
+        <div className="relative z-10">
+          <h3 className="text-4xl font-black text-white mb-4">Ready to level up your studies? 🔥</h3>
+          <p className="text-slate-300 mb-8 text-xl max-w-2xl mx-auto font-medium">Explore the tools in the sidebar and start your personalized learning journey with Tap2Gyaan today.</p>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 border border-white/20 animate-float text-3xl shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            👇
+          </div>
+        </div>
       </div>
     </div>
   );
