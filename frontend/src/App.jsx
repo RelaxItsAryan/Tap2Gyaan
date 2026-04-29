@@ -13,7 +13,6 @@ import PlannerPage from './components/PlannerPage';
 import BookInsights from './components/BookInsights';
 import CalendarPage from './components/CalendarPage';
 import TimetablePage from './components/TimetablePage';
-import ReportsPage from './components/ReportsPage';
 import GamificationPage from './components/GamificationPage';
 import SettingsPage from './components/SettingsPage';
 import AIChatbot from './components/AIChatbot';
@@ -35,7 +34,7 @@ function App() {
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-brand-bg bg-cover bg-center bg-fixed"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
@@ -56,7 +55,6 @@ function App() {
             <Route path="/books" element={<BookInsights />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/timetable" element={<TimetablePage />} />
-            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/gamification" element={<GamificationPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

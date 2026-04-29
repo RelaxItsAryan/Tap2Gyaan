@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Coffee, SkipForward, Settings2, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, RotateCcw, Coffee, SkipForward, Settings2, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useTimer } from '../context/TimerContext';
 
 const PRESETS = {
   classic: { work: 25 * 60, break: 5 * 60, longBreak: 15 * 60, label: '25/5' },
@@ -11,11 +12,12 @@ const PRESETS = {
 const formatTime = (s) => {
   const m = Math.floor(s / 60);
   const sec = s % 60;
-  return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
 };
 
 export default function PomodoroTimer() {
   const { addXP } = useApp();
+  const { syncedBlock, syncStudyBlock } = useTimer();
   const [preset, setPreset] = useState('classic');
   const [mode, setMode] = useState('work'); // work | break | longBreak
   const [timeLeft, setTimeLeft] = useState(PRESETS.classic.work);
@@ -44,7 +46,7 @@ export default function PomodoroTimer() {
       gain.gain.value = 0.3;
       osc.start();
       setTimeout(() => { osc.stop(); ctx.close(); }, 300);
-    } catch(e) {}
+    } catch (e) { }
   }, [soundOn]);
 
   useEffect(() => {
@@ -108,6 +110,21 @@ export default function PomodoroTimer() {
     setSessions(0);
   };
 
+  const startSyncedBlock = () => {
+    const durationMinutes = Number(syncedBlock?.durationMinutes) || PRESETS[preset].work / 60;
+    const nextTime = Math.max(15, durationMinutes) * 60;
+
+    if (syncedBlock?.subject) {
+      syncStudyBlock({ ...syncedBlock, source: 'pomodoro' });
+    }
+
+    clearInterval(intervalRef.current);
+    setMode('work');
+    setTimeLeft(nextTime);
+    setIsRunning(true);
+    setSessions(0);
+  };
+
   const modeColor = mode === 'work' ? 'text-brand-accent' : mode === 'break' ? 'text-brand-success' : 'text-blue-400';
   const modeStroke = mode === 'work' ? '#3B82F6' : mode === 'break' ? '#22C55E' : '#60A5FA';
   const modeBg = mode === 'work' ? 'bg-brand-accent/10' : mode === 'break' ? 'bg-green-500/10' : 'bg-blue-500/10';
@@ -116,7 +133,35 @@ export default function PomodoroTimer() {
   return (
     <div className="page-enter max-w-2xl mx-auto px-4">
       <h1 className="text-2xl font-black text-white mb-2">Pomodoro Timer</h1>
-      <p className="text-slate-400 text-sm mb-8">Stay focused with timed study sessions</p>
+      <p className="text-slate-400 text-sm mb-6">Stay focused with timed study sessions</p>
+
+      {syncedBlock?.subject && (
+        <div className="mb-8 rounded-2xl border border-brand-border bg-brand-card p-5">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-brand-accent mb-2">
+            <Sparkles size={14} /> Synced from AI study plan
+          </div>
+          <div className="text-white font-bold text-lg">{syncedBlock.subject}</div>
+          {syncedBlock.task && <div className="text-sm text-slate-400 mt-1">{syncedBlock.task}</div>}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {syncedBlock.durationMinutes && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-brand-border">
+                {syncedBlock.durationMinutes} min focus block
+              </span>
+            )}
+            {syncedBlock.start && syncedBlock.end && (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-brand-border">
+                {syncedBlock.start} - {syncedBlock.end}
+              </span>
+            )}
+            <button
+              onClick={startSyncedBlock}
+              className="ml-auto bg-brand-accent hover:bg-brand-accent-hover text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+            >
+              Start synced block
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Preset selector */}
       <div className="flex gap-2 mb-8 justify-center">
@@ -176,7 +221,7 @@ export default function PomodoroTimer() {
               : 'bg-brand-accent text-white shadow-brand-accent/25 hover:bg-brand-accent-hover'}`}
         >
           {isRunning ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" />}
-          {isRunning ? 'Pause' : 'Start'}
+          {isRunning ? 'Pause' : syncedBlock?.subject ? 'Start Timer' : 'Start'}
         </button>
 
         <button onClick={handleSkip} className="p-3 bg-brand-card border border-brand-border rounded-xl text-slate-400 hover:text-white hover:border-slate-600 transition-all">

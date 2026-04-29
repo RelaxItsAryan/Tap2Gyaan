@@ -6,8 +6,6 @@ import {
   CalendarDays, Clock3, BarChart3, Trophy, Settings, LogOut, Menu, X,
   Flame, Bot
 } from 'lucide-react';
-import logo from '../assets/logo.png';
-
 
 const navItems = [
   { path: '/', icon: Users, label: 'Study Rooms' },
@@ -16,11 +14,10 @@ const navItems = [
   { path: '/quizzes', icon: Brain, label: 'Quizzes' },
   { path: '/interview', icon: Briefcase, label: 'Interview' },
   { path: '/notes', icon: StickyNote, label: 'Notes' },
-  { path: '/planner', icon: ListChecks, label: 'Planner' },
+  { path: '/planner', icon: ListChecks, label: 'AI Study Plan' },
   { path: '/books', icon: BookOpen, label: 'AI book notes' },
   { path: '/calendar', icon: CalendarDays, label: 'Calendar' },
   { path: '/timetable', icon: Clock3, label: 'Timetable' },
-  { path: '/reports', icon: BarChart3, label: 'Reports' },
   { path: '/gamification', icon: Trophy, label: 'Gamification' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
@@ -63,12 +60,12 @@ export default function Sidebar() {
       >
         {/* Brand */}
         <div className="px-4 py-5 border-b border-brand-border flex items-center gap-3 min-h-[68px]">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-            <img src={logo} alt="Tap2Gyaan Logo" className="w-full h-full object-contain" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-accent to-blue-400 flex items-center justify-center shrink-0 shadow-lg shadow-brand-accent/20">
+            <Flame size={18} className="text-white" />
           </div>
           <span className={`font-black text-white text-lg whitespace-nowrap overflow-hidden transition-all duration-300
             ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 lg:group-hover/sidebar:opacity-100 lg:group-hover/sidebar:w-auto'}`}>
-            Tap2Gyaan
+            TAP2GYAAN
           </span>
         </div>
 

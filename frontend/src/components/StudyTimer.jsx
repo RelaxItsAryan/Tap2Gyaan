@@ -1,115 +1,184 @@
 import React from 'react';
-import { Play, Pause, Square } from 'lucide-react';
-import { useTimer } from '../context/TimerContext';
-import { triggerToast } from './Toast';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import {
+  Users, Timer, Brain, Briefcase, StickyNote, ListChecks, BookOpen,
+  CalendarDays, Clock3, BarChart3, Trophy, Settings, LogOut, Menu, X,
+  Flame, Bot
+} from 'lucide-react';
 
-const formatTime = (seconds) => {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-};
-
-const SUBJECTS = [
-  'DSA', 'Mathematics', 'Physics', 'Chemistry',
-  'Biology', 'System Design', 'HR Prep', 'Other'
+const navItems = [
+  { path: '/', icon: Users, label: 'Study Rooms' },
+  { path: '/pomodoro', icon: Timer, label: 'Pomodoro' },
+  { path: '/ai-chat', icon: Bot, label: 'AI Assistant' },
+  { path: '/quizzes', icon: Brain, label: 'Quizzes' },
+  { path: '/interview', icon: Briefcase, label: 'Interview' },
+  { path: '/notes', icon: StickyNote, label: 'Notes' },
+  { path: '/planner', icon: ListChecks, label: 'AI Study Plan' },
+  { path: '/books', icon: BookOpen, label: 'AI book notes' },
+  { path: '/calendar', icon: CalendarDays, label: 'Calendar' },
+  { path: '/timetable', icon: Clock3, label: 'Timetable' },
+  { path: '/gamification', icon: Trophy, label: 'Gamification' },
+  { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
-export default function StudyTimer({ classId, currentTodayTime }) {
-  const {
-    isRunning, isPaused, elapsed, subject, setSubject,
-    startStudying, pauseStudying, resumeStudying, stopStudying
-  } = useTimer();
+export default function Sidebar() {
+  const { user, username, xp, sidebarOpen, setSidebarOpen, logout } = useApp();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleStart = () => {
-    if (isPaused) {
-      resumeStudying();
-    } else {
-      startStudying(classId);
-    }
-  };
+  const level = Math.floor(xp / 500) + 1;
+  const xpInLevel = xp % 500;
 
-  const handleStop = async () => {
-    const dur = await stopStudying(currentTodayTime);
-    if (dur > 0) {
-      triggerToast(`Session saved — ${Math.round(dur/60)} mins studied`, 'success');
-    }
+  const handleNav = (path) => {
+    navigate(path);
+    setSidebarOpen(false);
   };
 
   return (
-    <div className="bg-brand-card rounded-2xl p-6 shadow-xl border border-brand-border mb-6 relative overflow-hidden group">
-      {isRunning && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-brand-success/20">
-          <div className="h-full bg-brand-success shadow-[0_0_10px_#22C55E] animate-[progress_2s_ease-in-out_infinite]" />
-        </div>
+    <>
+      {/* Mobile toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed top-4 left-4 z-50 lg:hidden bg-brand-card border border-brand-border p-2.5 rounded-xl text-slate-300 hover:text-white hover:border-brand-accent transition-all"
+      >
+        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden backdrop-blur-sm"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
-      <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-
-        <div className="w-full md:w-auto flex-1 max-w-sm">
-          <label className="block text-sm font-medium text-slate-400 mb-2">Subject</label>
-          <select
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            disabled={isRunning || isPaused}
-            className="w-full bg-brand-bg text-white border border-brand-border rounded-xl px-4 py-3 focus:outline-none focus:border-brand-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-          >
-            {SUBJECTS.map(sub => (
-              <option key={sub} value={sub}>{sub}</option>
-            ))}
-          </select>
+      {/* Sidebar */}
+      <aside className={`fixed top-0 left-0 h-full z-40 bg-brand-card border-r border-brand-border flex flex-col transition-all duration-300 ease-in-out
+        ${sidebarOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full lg:translate-x-0 lg:w-[72px] lg:hover:w-64'}
+        group/sidebar`}
+      >
+        {/* Brand */}
+        <div className="px-4 py-5 border-b border-brand-border flex items-center gap-3 min-h-[68px]">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-accent to-blue-400 flex items-center justify-center shrink-0 shadow-lg shadow-brand-accent/20">
+            <Flame size={18} className="text-white" />
+          </div>
+          <span className={`font-black text-white text-lg whitespace-nowrap overflow-hidden transition-all duration-300
+            ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 lg:group-hover/sidebar:opacity-100 lg:group-hover/sidebar:w-auto'}`}>
+            One Tap Study
+          </span>
         </div>
 
-        <div className="flex flex-col items-center">
-          <div className="text-sm font-semibold text-slate-400 mb-1 uppercase tracking-widest">Session Time</div>
-          <div className={`text-6xl font-black font-mono tracking-tighter tabular-nums transition-colors ${
-            isRunning ? 'text-brand-success drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]' : isPaused ? 'text-yellow-400' : 'text-white'
-          }`}>
-            {formatTime(elapsed)}
+        {/* Nav items */}
+        <nav className="flex-1 py-3 px-2 overflow-y-auto custom-scrollbar space-y-0.5">
+          {navItems.map(item => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path ||
+              (item.path !== '/' && location.pathname.startsWith(item.path));
+            const isRoomActive = item.path === '/' && (location.pathname === '/' || location.pathname.startsWith('/room'));
+
+            const active = isActive || isRoomActive;
+
+            if (item.path === '/interview') {
+              return (
+                <a
+                  key={item.path}
+                  href="https://interview-buddy-v2.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5`}
+                >
+                  <Icon size={19} className="shrink-0" />
+                  <span className={`whitespace-nowrap overflow-hidden transition-all duration-300
+                    ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 lg:group-hover/sidebar:opacity-100 lg:group-hover/sidebar:w-auto'}`}>
+                    {item.label}
+                  </span>
+                </a>
+              );
+            }
+
+            return (
+              <button
+                key={item.path}
+                onClick={() => handleNav(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium
+                  ${active
+                    ? 'bg-brand-accent/15 text-brand-accent shadow-sm'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                <Icon size={19} className={`shrink-0 ${active ? 'text-brand-accent' : ''}`} />
+                <span className={`whitespace-nowrap overflow-hidden transition-all duration-300
+                  ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 lg:group-hover/sidebar:opacity-100 lg:group-hover/sidebar:w-auto'}`}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User section */}
+        <div className="px-3 py-4 border-t border-brand-border">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-accent to-blue-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {username.charAt(0).toUpperCase()}
+            </div>
+            <div className={`flex-1 overflow-hidden transition-all duration-300
+              ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 lg:group-hover/sidebar:opacity-100 lg:group-hover/sidebar:w-auto'}`}>
+              <div className="text-sm font-semibold text-white truncate">{username}</div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <Trophy size={10} className="text-brand-accent" />
+                <span>Lv.{level}</span>
+                <div className="flex-1 h-1 bg-brand-border rounded-full max-w-[60px]">
+                  <div className="h-full bg-brand-accent rounded-full transition-all" style={{ width: `${(xpInLevel / 500) * 100}%` }} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </aside>
 
-        <div className="flex w-full md:w-auto gap-3">
-          {(!isRunning && !isPaused) && (
-            <button
-              onClick={handleStart}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent-hover text-white px-6 py-4 rounded-xl font-bold transition-all shadow-lg shadow-brand-accent/20 active:scale-95"
-            >
-              <Play size={20} fill="currentColor" />
-              Start Studying
-            </button>
-          )}
+      {/* Mobile bottom nav (compact) */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-brand-card border-t border-brand-border flex justify-around py-2 px-1">
+        {navItems.slice(0, 5).map(item => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path || (item.path === '/' && location.pathname.startsWith('/room'));
 
-          {isRunning && (
-            <button
-              onClick={pauseStudying}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-slate-900 px-6 py-4 rounded-xl font-bold transition-all shadow-lg shadow-yellow-400/20 active:scale-95"
-            >
-              <Pause size={20} fill="currentColor" />
-              Pause
-            </button>
-          )}
+          if (item.path === '/interview') {
+            return (
+              <a
+                key={item.path}
+                href="https://interview-buddy-v2.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors text-[10px] text-slate-500"
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </a>
+            );
+          }
 
-          {isPaused && (
+          return (
             <button
-              onClick={handleStart}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent-hover text-white px-6 py-4 rounded-xl font-bold transition-all shadow-lg shadow-brand-accent/20 active:scale-95"
+              key={item.path}
+              onClick={() => handleNav(item.path)}
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors text-[10px]
+                ${isActive ? 'text-brand-accent' : 'text-slate-500'}`}
             >
-              <Play size={20} fill="currentColor" />
-              Resume
+              <Icon size={18} />
+              <span>{item.label}</span>
             </button>
-          )}
-
-          {(isRunning || isPaused) && (
-            <button
-              onClick={handleStop}
-              className="flex-none flex items-center justify-center gap-2 bg-red-500 hover:bg-red-400 text-white px-6 py-4 rounded-xl font-bold transition-all shadow-lg shadow-red-500/20 active:scale-95"
-            >
-              <Square size={20} fill="currentColor" />
-            </button>
-          )}
-        </div>
+          );
+        })}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-slate-500 text-[10px]"
+        >
+          <Menu size={18} />
+          <span>More</span>
+        </button>
       </div>
-    </div>
+    </>
   );
 }

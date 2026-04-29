@@ -12,8 +12,16 @@ export const TimerProvider = ({ children }) => {
   const [elapsed, setElapsed] = useState(0);
   const [subject, setSubject] = useState('DSA');
   const [startTime, setStartTime] = useState(null);
-  
+  const [syncedBlock, setSyncedBlock] = useState(null);
+
   const timerRef = useRef(null);
+
+  const syncStudyBlock = (block) => {
+    setSyncedBlock(block);
+    if (block?.subject) {
+      setSubject(block.subject);
+    }
+  };
 
   // Mock user for demo as requested
   const userId = "user_demo_001";
@@ -33,7 +41,7 @@ export const TimerProvider = ({ children }) => {
     setStartTime(now);
     setIsRunning(true);
     setIsPaused(false);
-    
+
     // Start local tick
     timerRef.current = setInterval(() => {
       setElapsed((prev) => prev + 1);
@@ -66,7 +74,7 @@ export const TimerProvider = ({ children }) => {
     // If we resume, and we pretend we started (now - elapsed*1000) ago.
     const newStartTime = Date.now() - (elapsed * 1000);
     setStartTime(newStartTime);
-    
+
     timerRef.current = setInterval(() => {
       setElapsed((prev) => prev + 1);
     }, 1000);
@@ -76,15 +84,15 @@ export const TimerProvider = ({ children }) => {
     if (!isRunning && !isPaused) return;
 
     if (timerRef.current) clearInterval(timerRef.current);
-    
+
     const durationSeconds = elapsed;
     const cid = classIdRef.current;
-    
+
     // Format payload
     try {
       const newTotal = (currentTodayTime || 0) + durationSeconds;
       const memberRef = doc(db, 'classMembers', `${cid}_${userId}`);
-      
+
       await updateDoc(memberRef, {
         isStudying: false,
         todayTime: newTotal
@@ -94,12 +102,12 @@ export const TimerProvider = ({ children }) => {
         userId,
         classId: cid,
         subject,
-        startTime: startTime, 
+        startTime: startTime,
         endTime: Date.now(),
         duration: durationSeconds,
         timestamp: serverTimestamp()
       });
-      
+
     } catch (e) {
       console.error("Error stopping study session:", e);
     }
@@ -122,6 +130,8 @@ export const TimerProvider = ({ children }) => {
       elapsed,
       subject,
       setSubject,
+      syncedBlock,
+      syncStudyBlock,
       startStudying,
       pauseStudying,
       resumeStudying,
