@@ -50,6 +50,38 @@ export default function PomodoroTimer() {
   }, [soundOn]);
 
   useEffect(() => {
+    if (isRunning && mode === 'work') {
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => console.log(err));
+      }
+    }
+  }, [isRunning, mode]);
+
+  useEffect(() => {
+    let alertShown = false;
+    
+    const handleLeave = () => {
+      if (isRunning && mode === 'work' && !alertShown) {
+        alertShown = true;
+        alert("⚠️ Stay focused! Please don't switch tabs or leave the window while studying.");
+        setTimeout(() => { alertShown = false; }, 1000);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) handleLeave();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("blur", handleLeave);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("blur", handleLeave);
+    };
+  }, [isRunning, mode]);
+
+  useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => {

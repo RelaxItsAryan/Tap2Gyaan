@@ -116,6 +116,39 @@ export const TimerProvider = ({ children }) => {
     return durationSeconds;
   };
 
+  // Fullscreen & focus tracking
+  useEffect(() => {
+    if (isRunning && !isPaused) {
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => console.log(err));
+      }
+    }
+  }, [isRunning, isPaused]);
+
+  useEffect(() => {
+    let alertShown = false;
+    
+    const handleLeave = () => {
+      if (isRunning && !isPaused && !alertShown) {
+        alertShown = true;
+        alert("⚠️ Stay focused! Please don't switch tabs or leave the window while studying.");
+        setTimeout(() => { alertShown = false; }, 1000);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) handleLeave();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("blur", handleLeave);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("blur", handleLeave);
+    };
+  }, [isRunning, isPaused]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
