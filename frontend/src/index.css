@@ -101,3 +101,53 @@ input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px #141414 inset !important;
   -webkit-text-fill-color: #e2e8f0 !important;
 }
+
+/* Markdown Styling */
+.prose-markdown {
+  @apply text-slate-200;
+}
+.prose-markdown p {
+  @apply mb-3 last:mb-0;
+}
+.prose-markdown strong {
+  @apply font-bold text-white;
+}
+.prose-markdown ul, .prose-markdown ol {
+  @apply mb-3 ml-4;
+}
+.prose-markdown ul {
+  @apply list-disc;
+}
+.prose-markdown ol {
+  @apply list-decimal;
+}
+.prose-markdown li {
+  @apply mb-1 last:mb-0;
+}
+.prose-markdown h1, .prose-markdown h2, .prose-markdown h3 {
+  @apply font-bold text-white mt-4 mb-2 first:mt-0;
+}
+.prose-markdown h1 { @apply text-lg; }
+.prose-markdown h2 { @apply text-base; }
+.prose-markdown h3 { @apply text-sm; }
+.prose-markdown code {
+  @apply bg-white/10 px-1.5 py-0.5 rounded text-brand-accent font-mono text-xs;
+}
+.prose-markdown pre {
+  @apply bg-black/40 p-3 rounded-xl border border-brand-border overflow-x-auto my-3;
+}
+.prose-markdown pre code {
+  @apply bg-transparent p-0 rounded-none text-slate-300;
+}
+.prose-markdown blockquote {
+  @apply border-l-2 border-brand-accent/50 pl-4 py-1 my-3 text-slate-400 italic;
+}
+.prose-markdown table {
+  @apply w-full border-collapse my-4 text-xs;
+}
+.prose-markdown th, .prose-markdown td {
+  @apply border border-brand-border px-3 py-2 text-left;
+}
+.prose-markdown th {
+  @apply bg-white/5 font-bold text-white;
+}

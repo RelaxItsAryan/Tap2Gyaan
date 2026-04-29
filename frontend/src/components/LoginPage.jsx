@@ -111,7 +111,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10 animate-slide-up">
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-to-br from-brand-accent/20 to-blue-400/20 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl shadow-brand-accent/10 overflow-hidden border border-white/10 p-2">
+          <div className="w-24 h-24 mx-auto flex items-center justify-center mb-6 overflow-hidden">
             <img src={logo} alt="Tap2Gyaan Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-black text-white mb-2">Tap2Gyaan</h1>

@@ -63,8 +63,8 @@ export default function Sidebar() {
       >
         {/* Brand */}
         <div className="px-4 py-5 border-b border-brand-border flex items-center gap-3 min-h-[68px]">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-accent/20 to-blue-400/20 flex items-center justify-center shrink-0 shadow-lg shadow-brand-accent/10 overflow-hidden border border-white/10">
-            <img src={logo} alt="Tap2Gyaan Logo" className="w-full h-full object-cover p-1" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+            <img src={logo} alt="Tap2Gyaan Logo" className="w-full h-full object-contain" />
           </div>
           <span className={`font-black text-white text-lg whitespace-nowrap overflow-hidden transition-all duration-300
             ${sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 lg:group-hover/sidebar:opacity-100 lg:group-hover/sidebar:w-auto'}`}>
